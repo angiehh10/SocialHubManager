@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+}
+
+html, body {
+  @apply bg-base-50 text-base-800;
+}
+
+.card {
+  @apply bg-white rounded-2xl shadow-lg border border-base-200;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-xl font-medium transition;
+}
+.btn-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-2 focus:ring-primary-300;
+}
+.input {
+  @apply w-full rounded-xl border border-base-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300;
+}
+.label {
+  @apply mb-1 block text-sm text-base-600;
+}

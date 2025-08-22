@@ -3,6 +3,11 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event; 
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\Reddit\RedditExtendSocialite;
+use SocialiteProviders\Discord\DiscordExtendSocialite;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+         Event::listen(SocialiteWasCalled::class, [RedditExtendSocialite::class, 'handle']);
+         Event::listen(SocialiteWasCalled::class, [DiscordExtendSocialite::class, 'handle']);
     }
 }

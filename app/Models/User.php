@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+
+
 class User extends Authenticatable
 {
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -45,4 +48,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+     public function socialConnections()
+    {
+        return $this->hasMany(\App\Models\SocialConnection::class);
+    }
+
+    public function socialConnection(string $provider)
+    {
+        return $this->socialConnections()->where('provider', $provider)->first();
+    }
+
 }
