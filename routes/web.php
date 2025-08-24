@@ -19,10 +19,8 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-    // '2fa.required',
 ])->group(function () {
-
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
      // ===== Social (conexiones + OAuth) =====
     Route::prefix('social')->name('social.')->group(function () {
@@ -46,21 +44,20 @@ Route::middleware([
             ->name('callback');
     });
 
-    // ===== Publicaciones =====
-    Route::prefix('posts')->name('posts.')->group(function () {
-        Route::get('create', [PostController::class, 'create'])->name('create');
-        Route::post('/', [PostController::class, 'store'])->name('store');
-        Route::get('history', [PostController::class, 'history'])->name('history');
-    });
+    // posts
+Route::prefix('posts')->name('posts.')->group(function () {
+Route::get('create', [PostController::class, 'create'])->name('create');
+Route::post('/', [PostController::class, 'store'])->name('store');
+Route::get('history', [PostController::class, 'history'])->name('history');
+});
 
-    // ===== Cola de publicaciones =====
-    Route::prefix('queue')->name('queue.')->group(function () {
-        Route::get('/', [QueueController::class, 'index'])->name('index');
-        Route::post('{queuedPost}/cancel', [QueueController::class, 'cancel'])->name('cancel');
-        Route::post('{queuedPost}/send-now', [QueueController::class, 'sendNow'])->name('send_now');
-    });
+// queue
+Route::prefix('queue')->name('queue.')->group(function () {
+Route::get('/', [QueueController::class, 'index'])->name('index');
+Route::post('{queuedPost}/cancel', [QueueController::class, 'cancel'])->name('cancel');
+Route::post('{queuedPost}/send-now', [QueueController::class, 'sendNow'])->name('send_now');
+});
 
-    // ===== Horarios =====
-    Route::resource('schedules', ScheduleController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
+// schedules
+Route::resource('schedules', ScheduleController::class)->only(['index','store','update','destroy']);
 });

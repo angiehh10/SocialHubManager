@@ -2,63 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PublishSchedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ScheduleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $items = PublishSchedule::where('user_id', Auth::id())
+            ->orderBy('weekday')->orderBy('time')->get();
+        return view('schedules.index', compact('items'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(Request $r)
     {
-        //
+        $r->validate([
+            'weekday' => 'required|integer|min:0|max:6',
+            'time'    => 'required|date_format:H:i',
+        ]);
+
+        PublishSchedule::create([
+            'user_id' => Auth::id(),
+            'weekday' => $r->integer('weekday'),
+            'time'    => $r->input('time').':00',
+            'active'  => true,
+        ]);
+
+        return back()->with('status','Horario agregado.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function update(Request $r, $id)
     {
-        //
+        $item = PublishSchedule::where('user_id', Auth::id())->findOrFail($id);
+        $r->validate([
+            'weekday' => 'required|integer|min:0|max:6',
+            'time'    => 'required|date_format:H:i',
+            'active'  => 'nullable|boolean',
+        ]);
+        $item->update([
+            'weekday' => $r->integer('weekday'),
+            'time'    => $r->input('time').':00',
+            'active'  => $r->boolean('active', true),
+        ]);
+        return back()->with('status','Horario actualizado.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        PublishSchedule::where('user_id', Auth::id())->where('id',$id)->delete();
+        return back()->with('status','Horario eliminado.');
     }
 }

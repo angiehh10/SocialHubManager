@@ -1,16 +1,4 @@
 <x-app-layout>
-    @php
-        // Valores opcionales para los contadores (si no los pasas desde el controlador)
-        $stats = $stats ?? [
-            'connections'     => 0,
-            'scheduled_today' => 0,
-            'queue_pending'   => 0,
-            'published_week'  => 0,
-        ];
-        $upcoming = $upcoming ?? []; // Próximas publicaciones (array opcional)
-        $needs2fa = auth()->user()?->two_factor_confirmed_at === null;
-    @endphp
-
     {{-- Banner superior --}}
     <div class="relative overflow-hidden">
         <div class="absolute inset-0 -z-10 bg-gradient-to-br from-primary-100 via-white to-transparent dark:from-primary-900/30 dark:via-base-900 dark:to-transparent"></div>

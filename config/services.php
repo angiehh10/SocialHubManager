@@ -40,6 +40,7 @@ return [
         'client_id'     => env('REDDIT_CLIENT_ID'),
         'client_secret' => env('REDDIT_CLIENT_SECRET'),
         'redirect'      => env('REDDIT_REDIRECT_URI'),
+        'user_agent' => env('REDDIT_USER_AGENT'),
     ],
 
         'discord' => [
