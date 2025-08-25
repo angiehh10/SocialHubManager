@@ -18,32 +18,26 @@ class ProcessQueueTick implements ShouldQueue
     public function handle(): void
     {
         // Procesa por usuario: si hay un slot debido, toma UNA entrada de la cola y publícala
-        $now = now(); // usa tz de app: config('app.timezone')
+        $now    = now(config('app.timezone', 'UTC')); // usa tz de app: config('app.timezone')
+        $nowUtc = now('UTC');
 
-        // Usuarios que tienen algo en cola
-        $userIds = Post::select('user_id')
-            ->queued()
-            ->groupBy('user_id')
-            ->pluck('user_id');
-
+        // ---- cola por slots (usa tz de la app) ----
+        $userIds = Post::select('user_id')->queued()->groupBy('user_id')->pluck('user_id');
         foreach ($userIds as $uid) {
-            // ¿Hay un slot debido ahora?
-            $slot = $this->nextDueSlotForUser($uid, $now);
-            if (!$slot || $slot->gt($now)) continue;
+            $slot = $this->nextDueSlotForUser($uid, $nowApp);
+            if (!$slot || $slot->gt($nowApp)) continue;
 
-            // Toma UNA publicación en cola (FIFO) y lánzala
             $post = Post::where('user_id', $uid)->queued()->orderBy('id')->first();
             if (!$post) continue;
 
-            $post->update(['status' => 'scheduled', 'scheduled_for' => $now]);
-
+            $post->update(['status' => 'scheduled', 'scheduled_for' => $nowUtc]); // guarda en UTC
             dispatch(new PublishPostJob($post->id));
         }
 
-        // Publicaciones programadas explícitamente para ahora o antes (ignora horario del usuario)
+        // ---- programadas explícitas (compara en UTC) ----
         $due = Post::scheduled()
             ->whereNotNull('scheduled_for')
-            ->where('scheduled_for', '<=', $now)
+            ->where('scheduled_for', '<=', $nowUtc)
             ->pluck('id');
 
         foreach ($due as $pid) {

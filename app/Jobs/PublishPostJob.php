@@ -90,7 +90,7 @@ class PublishPostJob implements ShouldQueue
             // todos OK -> publicamos el Post
             $post->update([
                 'status'       => 'published', 
-                'published_at' => now(),
+                'published_at' => now('UTC'),
             ]);
         } else {
             // quedó algo pendiente
