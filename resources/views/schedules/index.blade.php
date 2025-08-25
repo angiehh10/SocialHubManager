@@ -14,10 +14,41 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="label">Hora</label>
-                <input type="time" name="time" class="input w-full" required>
-            </div>
+            
+                    @php
+            // Genera opciones cada 1 min 
+            $times = [];
+            for ($h = 0; $h < 24; $h++) {
+                for ($m = 0; $m < 60; $m += 1) {
+                    $times[] = sprintf('%02d:%02d', $h, $m);
+                }
+            }
+             @endphp
+
+                <div>
+            <label class="label">Hora (Escribe la hora (HH:MM) o elige una sugerencia)</label>
+
+            <input
+                type="time"
+                name="time"
+                class="input w-full"
+                step="60"                     {{-- minutos enteros --}}
+                value="{{ old('time') }}"
+                list="time-suggest"           {{-- sugerencias --}}
+                placeholder="hh:mm"
+                required
+            >
+
+            <datalist id="time-suggest">
+                @foreach ($times as $t)
+                    <option value="{{ $t }}"></option>
+                @endforeach
+            </datalist>
+
+            @error('time')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
+        </div>
+
+
             <div>
                 <button class="btn btn-primary w-full">Agregar</button>
             </div>

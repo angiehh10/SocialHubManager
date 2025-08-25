@@ -1,7 +1,10 @@
-{{-- resources/views/posts/create.blade.php --}}
 <x-app-layout>
     <div class="max-w-3xl mx-auto p-6"
-         x-data="{ providerChoice: '{{ old('provider_choice', request('pref','')) }}' }">
+         x-data="{
+            providerChoice: '{{ old('provider_choice', request('pref','')) }}',
+            mode: '{{ old('mode','now') }}',
+            chooseDate: {{ old('choose_date') ? 'true' : 'false' }}
+         }">
 
         {{-- Flash: éxito --}}
         @if (session('status'))
@@ -212,25 +215,102 @@
                     @endif
                 </div>
 
-            
-            {{-- Paso 3: Modo de envío --}}
-            <div class="rounded-2xl border p-5">
-                <h2 class="font-semibold mb-3">Modo de envío</h2>
-                <div class="grid md:grid-cols-3 gap-3">
-                    <label class="inline-flex items-center gap-2">
-                        <input type="radio" name="mode" value="now" {{ old('mode','now')==='now'?'checked':'' }}>
-                        <span>Publicar ahora</span>
-                    </label>
-                    <label class="inline-flex items-center gap-2">
-                        <input type="radio" name="mode" value="queue" {{ old('mode')==='queue'?'checked':'' }}>
-                        <span>Enviar a cola (según horarios)</span>
-                    </label>
+                            
+                {{-- Paso 3: Modo de envío --}}
+                <div class="rounded-2xl border p-5">
+                    <h2 class="font-semibold mb-3">Modo de envío</h2>
+
+                    <div class="grid md:grid-cols-3 gap-3">
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="mode" value="now"
+                                @change="mode='now'" :checked="mode==='now'">
+                            <span>Publicar ahora</span>
+                        </label>
+
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="mode" value="queue"
+                                @change="mode='queue'" :checked="mode==='queue'">
+                            <span>Enviar a cola (sin horario)</span>
+                        </label>
+
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="mode" value="queue_slot"
+                                @change="mode='queue_slot'" :checked="mode==='queue_slot'">
+                            <span>Enviar a cola (usar horario)</span>
+                        </label>
+                    </div>
+
+                {{-- Selector de horario cuando el modo es "queue_slot" --}}
+                <div class="mt-4" x-show="mode==='queue_slot'" x-cloak>
+                    <div class="rounded-2xl border p-4 space-y-4">
+                        @if($slots->count())
+                            <div>
+                                <label class="label mb-2">Elige un horario</label>
+                                <div class="space-y-2 max-h-60 overflow-auto pr-1">
+                                    @php $days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']; @endphp
+                                    @foreach($slots as $s)
+                                        @php
+                                            $timeStr = $s->time instanceof \DateTimeInterface
+                                                ? $s->time->format('H:i')
+                                                : \Carbon\Carbon::parse($s->time)->format('H:i');
+                                        @endphp
+                                        <label class="flex items-center gap-3 p-2 rounded-xl border hover:bg-base-50 dark:hover:bg-base-800/60">
+                                            <input type="radio" name="schedule_slot_id"
+                                                value="{{ $s->id }}"
+                                                {{ old('schedule_slot_id')==$s->id ? 'checked' : '' }}>
+                                            <span class="text-sm">
+                                                <span class="font-medium">{{ $days[$s->weekday] }}</span>
+                                                <span class="opacity-70">·</span>
+                                                <span>{{ $timeStr }}</span>
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                @error('schedule_slot_id')<p class="text-sm text-red-600 mt-2">{{ $message }}</p>@enderror
+                            </div>
+
+                            {{-- NUEVO: ¿Quieres elegir la fecha exacta? --}}
+                            <div class="rounded-xl border p-3">
+                                <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="choose_date" value="1" x-model="chooseDate">
+                                    <span class="text-sm">Elegir fecha exacta</span>
+                                </label>
+
+                                <div class="mt-3 grid sm:grid-cols-2 gap-3" x-show="chooseDate" x-cloak>
+                                    <div>
+                                        <label class="label">Fecha</label>
+                                        @php
+                                            $tz = auth()->user()->timezone ?? 'America/Costa_Rica';
+                                            $minDate = \Carbon\Carbon::now($tz)->toDateString();
+                                        @endphp
+                                        <input type="date"
+                                            name="schedule_date"
+                                            class="input w-full"
+                                            min="{{ $minDate }}"
+                                            value="{{ old('schedule_date') }}">
+                                        <p class="text-xs text-base-500 mt-1">
+                                            Días anteriores están desactivados. Si eliges una fecha pasada por error, se moverá una semana adelante.
+                                        </p>
+                                        @error('schedule_date')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
+                                    </div>
+                                </div>
+
+                            </div>
+                        @else
+                            <div class="text-sm text-base-600">
+                                Aún no tienes horarios. <a class="underline" href="{{ route('schedules.index') }}">Crea tus horarios</a>.
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
-            <div class="flex items-center justify-end gap-3">
-                <a href="{{ route('queue.index') }}" class="px-4 py-2 rounded-xl ring-1 ring-base-300 hover:ring-base-400">Cancelar</a>
-                <button class="btn btn-primary">Guardar</button>
-            </div>
-        </form>
+
+                <div class="flex items-center justify-end gap-3">
+        <a href="{{ route('queue.index') }}" class="px-4 py-2 rounded-xl ring-1 ring-base-300 hover:ring-base-400">Cancelar</a>
+        <button class="btn btn-primary">Guardar</button>
     </div>
+</form>
+</div>
 </x-app-layout>
+
+
