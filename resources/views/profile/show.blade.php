@@ -13,6 +13,46 @@
                 <x-section-border />
             @endif
 
+            {{-- 🔗 Foto de perfil desde URL (opción adicional a la original) --}}
+            <div class="mt-10 sm:mt-0">
+                <x-action-section>
+                    <x-slot name="title">
+                        {{ __('Foto desde URL') }}
+                    </x-slot>
+
+                    <x-slot name="description">
+                        {{ __('Pega la URL de una imagen (JPG/PNG/WEBP) para usarla como foto de perfil. Esta opción convive con la de subir archivo.') }}
+                    </x-slot>
+
+                    <x-slot name="content">
+                        <form method="POST" action="{{ route('profile.photo-url') }}" class="max-w-xl space-y-3">
+                            @csrf
+
+                            <x-input id="avatar_url"
+                                     name="avatar_url"
+                                     type="url"
+                                     class="w-full"
+                                     placeholder="https://ejemplo.com/mi-avatar.jpg"
+                                     required />
+
+                            @error('avatar_url')
+                                <p class="text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+
+                            @if (session('status') === 'photo-url-updated')
+                                <p class="text-sm text-green-600">{{ __('Foto actualizada correctamente.') }}</p>
+                            @endif
+
+                            <x-button type="submit">
+                                {{ __('Usar URL') }}
+                            </x-button>
+                        </form>
+                    </x-slot>
+                </x-action-section>
+            </div>
+
+            <x-section-border />
+
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
                 <div class="mt-10 sm:mt-0">
                     @livewire('profile.update-password-form')
@@ -43,3 +83,4 @@
         </div>
     </div>
 </x-app-layout>
+
