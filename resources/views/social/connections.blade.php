@@ -3,14 +3,14 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     Conexiones sociales
                 </h2>
-                <p class="text-sm text-base-600 dark:text-base-400 mt-1">
+                <p class="text-sm text-base-600 mt-1">
                     Autoriza tus cuentas para poder publicar desde Social Hub Manager.
                 </p>
             </div>
-            <span class="hidden md:inline-flex items-center gap-2 text-xs px-2.5 py-1 rounded-lg ring-1 ring-base-300 dark:ring-base-700">
+            <span class="hidden md:inline-flex items-center gap-2 text-xs px-2.5 py-1 rounded-lg ring-1 ring-base-300">
                 Seguro con OAuth & 2FA
             </span>
         </div>
@@ -19,7 +19,7 @@
     <div class="py-8">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if (session('status'))
-                <div class="mb-2 rounded-xl border border-green-200/70 bg-green-50/70 dark:border-green-900/40 dark:bg-green-900/20 px-4 py-3 text-sm text-green-800 dark:text-green-200">
+                <div class="mb-2 rounded-xl border border-green-200/70 bg-green-50/70 px-4 py-3 text-sm text-green-800">
                     {{ session('status') }}
                 </div>
             @endif
@@ -37,24 +37,24 @@
                 @foreach($providers as $p)
                     @php $conn = $existing->get($p); @endphp
 
-                    <div class="rounded-2xl border border-base-200 dark:border-base-800 bg-white/80 dark:bg-base-900/70 backdrop-blur p-6 shadow-sm hover:shadow-md transition">
+                    <div class="rounded-2xl border border-base-200 bg-white/80 backdrop-blur p-6 shadow-sm hover:shadow-md transition">
                         <div class="flex items-start justify-between">
                             <div class="flex items-center gap-3">
-                                <span class="h-10 w-10 rounded-xl bg-base-100 dark:bg-base-800 text-base-700 dark:text-base-200 flex items-center justify-center">
+                                <span class="h-10 w-10 rounded-xl bg-base-100 text-base-700 flex items-center justify-center">
                                     {!! $icons[$p] !!}
                                 </span>
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    <h3 class="text-lg font-semibold text-gray-900">
                                         {{ $labels[$p] ?? ucfirst($p) }}
                                     </h3>
                                     <div class="mt-1 text-sm">
                                         @if($conn)
-                                            <span class="inline-flex items-center gap-1.5 text-green-700 dark:text-green-300">
+                                            <span class="inline-flex items-center gap-1.5 text-green-700">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
                                                 Conectado
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-300">
+                                            <span class="inline-flex items-center gap-1.5 text-amber-700">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                                                 No conectado
                                             </span>
@@ -83,22 +83,22 @@
                         </div>
 
                         @if($conn)
-                            <div class="mt-4 grid gap-2 text-xs text-base-600 dark:text-base-400">
+                            <div class="mt-4 grid gap-2 text-xs text-base-600">
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-base-100 dark:bg-base-800">
+                                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-base-100">
                                         <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18M3 12h14M3 17h10"/></svg>
                                     </span>
                                     <span><span class="opacity-70">ID proveedor:</span> {{ $conn->provider_user_id }}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-base-100 dark:bg-base-800">
+                                    <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-base-100">
                                         <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 18L18 6M6 6l12 12"/></svg>
                                     </span>
                                     <span><span class="opacity-70">Conectado el:</span> {{ optional($conn->created_at)->format('Y-m-d H:i') }}</span>
                                 </div>
                                 @if(!empty($conn->scopes))
                                     <div class="flex items-start gap-2">
-                                        <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-base-100 dark:bg-base-800">
+                                        <span class="inline-flex h-5 w-5 items-center justify-center rounded-md bg-base-100">
                                             <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6v12M6 12h12"/></svg>
                                         </span>
                                         <span><span class="opacity-70">Scopes:</span> {{ implode(', ', $conn->scopes) }}</span>
@@ -106,7 +106,7 @@
                                 @endif
                             </div>
                         @else
-                            <div class="mt-4 text-xs text-base-600 dark:text-base-400">
+                            <div class="mt-4 text-xs text-base-600">
                                 Conecta tu cuenta para poder publicar desde {{ $labels[$p] ?? ucfirst($p) }}.
                             </div>
                         @endif

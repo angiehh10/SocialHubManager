@@ -10,7 +10,7 @@
         @if (session('status'))
             <div x-data="{show:true}" x-show="show"
                  x-init="setTimeout(()=>show=false, 5000)"
-                 class="mb-4 rounded-xl border border-green-200/70 bg-green-50/70 dark:border-green-900/40 dark:bg-green-900/20 px-4 py-3 text-sm text-green-800 dark:text-green-200">
+                 class="mb-4 rounded-xl border border-green-200/70 bg-green-50/70 px-4 py-3 text-sm text-green-800">
                 {{ session('status') }}
             </div>
         @endif
@@ -18,7 +18,7 @@
         {{-- Flash: error --}}
         @if (session('error'))
             <div x-data="{show:true}" x-show="show"
-                 class="mb-4 rounded-xl border border-red-200/70 bg-red-50/70 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-800 dark:text-red-200">
+                 class="mb-4 rounded-xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-sm text-red-800">
                 {{ session('error') }}
             </div>
         @endif
@@ -26,18 +26,18 @@
         {{-- Flash: aviso --}}
         @if (session('warning'))
             <div x-data="{show:true}" x-show="show"
-                 class="mb-4 rounded-xl border border-amber-200/70 bg-amber-50/70 dark:border-amber-900/40 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                 class="mb-4 rounded-xl border border-amber-200/70 bg-amber-50/70 px-4 py-3 text-sm text-amber-800">
                 {{ session('warning') }}
             </div>
         @endif
 
         {{-- Resumen de validación --}}
         @if ($errors->any())
-            <div class="mb-4 rounded-xl border border-red-200/70 bg-red-50/70 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3">
-                <div class="text-sm font-semibold text-red-800 dark:text-red-200 mb-2">
+            <div class="mb-4 rounded-xl border border-red-200/70 bg-red-50/70 px-4 py-3">
+                <div class="text-sm font-semibold text-red-800 mb-2">
                     Por favor corrige los siguientes errores:
                 </div>
-                <ul class="list-disc ms-5 text-sm text-red-800 dark:text-red-200 space-y-0.5">
+                <ul class="list-disc ms-5 text-sm text-red-800 space-y-0.5">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -61,7 +61,7 @@
                         <input type="radio" name="provider_choice" value="reddit" class="sr-only"
                                @change="providerChoice='reddit'">
                         <div class="flex items-center gap-3">
-                            <span class="h-10 w-10 rounded-xl bg-base-100 dark:bg-base-800 flex items-center justify-center">
+                            <span class="h-10 w-10 rounded-xl bg-base-100 flex items-center justify-center">
                                 {{-- icono reddit --}}
                                 <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
                                     <circle cx="12" cy="12" r="10" class="opacity-20"></circle>
@@ -80,7 +80,7 @@
                         <input type="radio" name="provider_choice" value="discord" class="sr-only"
                                @change="providerChoice='discord'">
                         <div class="flex items-center gap-3">
-                            <span class="h-10 w-10 rounded-xl bg-base-100 dark:bg-base-800 flex items-center justify-center">
+                            <span class="h-10 w-10 rounded-xl bg-base-100 flex items-center justify-center">
                                 {{-- icono discord --}}
                                 <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
                                     <path d="M20 4a16 16 0 0 0-4-.9l-.2.4a14 14 0 0 1 3.4 1.2c-3-1.5-6.3-1.5-9.4 0A14 14 0 0 1 12 3.5l-.2-.4A16 16 0 0 0 8 4C3.7 7.9 3 12.6 3.3 17.3 5 18.7 7 19.7 9.2 20l.5-1.3c-.9-.3-1.8-.7-2.6-1.2.2-.1.4-.3.6-.4 2.4 1.1 5.2 1.1 7.6 0 .2.1.4.3.6.4-.8.5-1.7.9-2.6 1.2l.5 1.3c2.2-.3 4.2-1.3 5.9-2.7C21 12.6 20.3 7.9 16 4ZM9.8 14.5c-.8 0-1.5-.8-1.5-1.7s.7-1.7 1.5-1.7 1.5.8 1.5 1.7-.7 1.7-1.5 1.7Zm4.4 0c-.8 0-1.5-.8-1.5-1.7s.7-1.7 1.5-1.7 1.5.8 1.5 1.7-.7 1.7-1.5 1.7Z"/>
@@ -161,7 +161,7 @@
                                             $urlShort     = \Illuminate\Support\Str::limit($wh->url, 36);
                                         @endphp
 
-                                        <label class="flex items-start gap-3 p-2 rounded-lg hover:bg-base-50 dark:hover:bg-base-800/60 border border-base-200 dark:border-base-700">
+                                        <label class="flex items-start gap-3 p-2 rounded-lg hover:bg-base-50 border border-base-200">
                                             <input
                                                 type="radio"
                                                 name="discord[webhook_id]"
@@ -254,7 +254,7 @@
                                                 ? $s->time->format('H:i')
                                                 : \Carbon\Carbon::parse($s->time)->format('H:i');
                                         @endphp
-                                        <label class="flex items-center gap-3 p-2 rounded-xl border hover:bg-base-50 dark:hover:bg-base-800/60">
+                                        <label class="flex items-center gap-3 p-2 rounded-xl border hover:bg-base-50">
                                             <input type="radio" name="schedule_slot_id"
                                                 value="{{ $s->id }}"
                                                 {{ old('schedule_slot_id')==$s->id ? 'checked' : '' }}>

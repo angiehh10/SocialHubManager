@@ -62,7 +62,6 @@ return [
         // Features::profilePhotos(),
         // Features::api(),
         // Features::teams(['invitations' => true]),
-        'confirmPassword' => true, // opcional
         Features::accountDeletion(),
     ],
 
