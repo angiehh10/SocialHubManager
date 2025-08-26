@@ -20,11 +20,11 @@ return new class extends Migration
             $table->string('link_url')->nullable(); // si publicas como link
 
             $table->enum('mode', ['now','queue','scheduled']);
-            $table->timestamp('scheduled_for')->nullable(); // para programadas
+            $table->dateTime('scheduled_for')->nullable();
 
             $table->enum('status', ['queued','scheduled','publishing','published','failed'])
                 ->default('queued');
-            $table->timestamp('published_at')->nullable();
+            $table->dateTime('published_at')->nullable();
             $table->text('error')->nullable();
             $table->timestamps();
 

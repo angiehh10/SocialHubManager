@@ -3,7 +3,6 @@
          x-data="{
             providerChoice: '{{ old('provider_choice', request('pref','')) }}',
             mode: '{{ old('mode','now') }}',
-            chooseDate: {{ old('choose_date') ? 'true' : 'false' }}
          }">
 
         {{-- Flash: éxito --}}
@@ -267,34 +266,6 @@
                                     @endforeach
                                 </div>
                                 @error('schedule_slot_id')<p class="text-sm text-red-600 mt-2">{{ $message }}</p>@enderror
-                            </div>
-
-                            {{-- NUEVO: ¿Quieres elegir la fecha exacta? --}}
-                            <div class="rounded-xl border p-3">
-                                <label class="inline-flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" name="choose_date" value="1" x-model="chooseDate">
-                                    <span class="text-sm">Elegir fecha exacta</span>
-                                </label>
-
-                                <div class="mt-3 grid sm:grid-cols-2 gap-3" x-show="chooseDate" x-cloak>
-                                    <div>
-                                        <label class="label">Fecha</label>
-                                        @php
-                                            $tz = auth()->user()->timezone ?? 'America/Costa_Rica';
-                                            $minDate = \Carbon\Carbon::now($tz)->toDateString();
-                                        @endphp
-                                        <input type="date"
-                                            name="schedule_date"
-                                            class="input w-full"
-                                            min="{{ $minDate }}"
-                                            value="{{ old('schedule_date') }}">
-                                        <p class="text-xs text-base-500 mt-1">
-                                            Días anteriores están desactivados. Si eliges una fecha pasada por error, se moverá una semana adelante.
-                                        </p>
-                                        @error('schedule_date')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
-                                    </div>
-                                </div>
-
                             </div>
                         @else
                             <div class="text-sm text-base-600">

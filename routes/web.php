@@ -49,6 +49,8 @@ Route::prefix('posts')->name('posts.')->group(function () {
 Route::get('create', [PostController::class, 'create'])->name('create');
 Route::post('/', [PostController::class, 'store'])->name('store');
 Route::get('history', [PostController::class, 'history'])->name('history');
+Route::get('{post}/schedule', [PostController::class, 'editSchedule'])->name('schedule.edit');
+Route::put('{post}/schedule', [PostController::class, 'updateSchedule'])->name('schedule.update');
 });
 
 // queue

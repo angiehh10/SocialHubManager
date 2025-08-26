@@ -90,7 +90,7 @@ class PublishPostJob implements ShouldQueue
             // todos OK -> publicamos el Post
             $post->update([
                 'status'       => 'published', 
-                'published_at' => now('UTC'),
+                'published_at' => now(config('app.timezone', 'America/Costa_Rica')),
             ]);
         } else {
             // quedó algo pendiente
