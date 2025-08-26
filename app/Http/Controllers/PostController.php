@@ -39,10 +39,6 @@ class PostController extends Controller
             'provider_choice' => 'required|in:reddit,discord',
             'mode'            => 'required|in:now,queue,queue_slot,scheduled', 
             'schedule_slot_id' => 'required_if:mode,queue_slot|nullable|exists:publish_schedules,id',
-            
-            // fecha opcional cuando el usuario marca el switch
-            'choose_date'      => 'nullable|boolean',
-            'schedule_date'    => 'exclude_unless:choose_date,1|required|date_format:Y-m-d',
 
             'title'         => 'nullable|string|max:300',
             'body'          => 'nullable|string',
@@ -63,7 +59,6 @@ class PostController extends Controller
             'schedule_slot_id'    => 'required_if:mode,queue_slot|exists:publish_schedules,id',
         ], [
             'provider_choice.required' => 'Elige un destino: Reddit o Discord.',
-             'schedule_slot_id.required_if' => 'Selecciona un horario.',
         ]);
 
         // Requiere al menos webhook_id o webhook_url si eligió Discord
@@ -81,7 +76,7 @@ class PostController extends Controller
         $mode = $r->input('mode');
         $scheduledFor = null;
 
-            if ($mode === 'queue_slot') {
+           if ($mode === 'queue_slot') {
             $slot = PublishSchedule::where('user_id', $user->id)
                 ->where(function($q){ $q->whereNull('active')->orWhere('active', true); })
                 ->findOrFail($r->input('schedule_slot_id'));
@@ -100,6 +95,20 @@ class PostController extends Controller
 
             $mode = 'scheduled';
 
+        }
+
+            // Si eligió “queue” (sin horario) pero SÍ tienes horarios, usa el próximo disponible
+        if ($mode === 'queue') {
+            $slot = PublishSchedule::where('user_id', Auth::id())
+                ->where(function($q){ $q->whereNull('active')->orWhere('active', true); })
+                ->orderBy('weekday')->orderBy('time')
+                ->get()
+                ->first();
+
+            if ($slot) {
+                $scheduledFor = $this->nextOccurrence((int) $slot->weekday, $slot->time);
+                $mode = 'scheduled';
+            }
         }
 
             // Si eligió “queue” (sin horario) pero SÍ tienes horarios, usa el próximo disponible
@@ -191,57 +200,46 @@ class PostController extends Controller
             );
 
     }
-
+    
     protected function nextOccurrence(int $weekday, $time, bool $forceNextWeek = false): Carbon
     {
-        $tz = config('app.timezone', 'UTC');
+        $tz = config('app.timezone', 'America/Costa_Rica');
 
-        // Normaliza la hora del slot
         $timeNormalized = Carbon::parse((string)$time, $tz)->format('H:i:s');
-        [$h, $m, $s] = explode(':', $timeNormalized);
+        [$h,$m,$s] = explode(':', $timeNormalized);
 
         $now = Carbon::now($tz);
         $candidate = $now->copy()->setTime((int)$h, (int)$m, (int)$s);
 
         $delta = ($weekday - $candidate->dayOfWeek + 7) % 7;
-        if ($delta > 0) {
-            $candidate->addDays($delta);
-        }
+        if ($delta > 0) $candidate->addDays($delta);
 
         if ($forceNextWeek || $candidate->lessThanOrEqualTo($now)) {
             $candidate->addDays(7);
         }
-
-        return $candidate->clone()->setTimezone('UTC');
+        return $candidate; // <- SIN setTimezone('UTC')
     }
 
     protected function combineDateWithSlotOrAdjust(string $date, int $weekday, string $time): Carbon
     {
-        $tz = config('app.timezone', 'UTC');
+        $tz = config('app.timezone', 'America/Costa_Rica');
 
-        // 1) Normaliza la hora del slot a HH:MM:SS (sin microsegundos ni basura)
         $timeNormalized = Carbon::parse((string)$time, $tz)->format('H:i:s');
-        [$h, $m, $s] = explode(':', $timeNormalized);
+        [$h,$m,$s] = explode(':', $timeNormalized);
 
-        // 2) Construye el datetime en la TZ de la app
         $chosen = Carbon::createFromFormat('Y-m-d H:i:s', "{$date} {$h}:{$m}:{$s}", $tz);
 
-        // 3) Si la fecha no cae en el weekday del slot, ajusta hacia adelante
         $delta = ($weekday - $chosen->dayOfWeek + 7) % 7;
         if ($delta !== 0) {
             $chosen->addDays($delta);
-            $labels = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-            session()->flash('warning', "La fecha no coincidía con el día del horario; se ajustó al próximo {$labels[$weekday]}.");
+            session()->flash('warning', 'La fecha no coincidía con el día del horario; se ajustó a la próxima ocurrencia.');
         }
 
-        // 4) Si quedó en el pasado (hoy y la hora ya pasó), empuja una semana
         $now = Carbon::now($tz);
         if ($chosen->lessThanOrEqualTo($now)) {
             $chosen->addDays(7);
         }
-
-        // 5) Guarda/retorna en UTC
-        return $chosen->clone()->setTimezone('UTC');
+        return $chosen; // <- SIN convertir
     }
 
     public function history()
@@ -263,5 +261,52 @@ class PostController extends Controller
 
         
         return view('queue.index', compact('pending', 'published'));
+    }
+
+    public function editSchedule(Post $post)
+    {
+        abort_unless($post->user_id === Auth::id(), 403);
+
+        if (!$post->scheduled_for) {
+            return back()->with('error', 'Esta publicación no tiene hora programada.');
+        }
+
+        $tz   = config('app.timezone', 'America/Costa_Rica');
+        $date = $post->scheduled_for->copy()->timezone($tz)->toDateString();
+
+        return view('posts.edit-schedule', compact('post', 'date', 'tz'));
+    }
+
+    public function updateSchedule(Request $r, Post $post)
+    {
+        abort_unless($post->user_id === Auth::id(), 403);
+
+        $tz = config('app.timezone', 'America/Costa_Rica');
+
+        $r->validate([
+            'schedule_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:'.now($tz)->toDateString()],
+        ]);
+
+        if (!$post->scheduled_for) {
+            return back()->with('error', 'Esta publicación no tiene hora programada.');
+        }
+
+        // 1) Tomar la hora/min/seg ACTUAL
+        $current = $post->scheduled_for->copy()->timezone($tz);
+        $h = (int) $current->format('H');
+        $m = (int) $current->format('i');
+        $s = (int) $current->format('s');
+
+        // 2) Combinar SOLO la nueva fecha con la misma hora
+        $newDate = Carbon::createFromFormat('Y-m-d', $r->input('schedule_date'), $tz)
+            ->setTime($h, $m, $s);
+
+        // 3) Guardar tal cual (misma hora)
+        $post->update([
+            'scheduled_for' => $newDate,
+            'status'        => 'scheduled',
+        ]);
+
+        return redirect()->route('queue.index')->with('status', 'Fecha actualizada.');
     }
 }

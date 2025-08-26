@@ -14,6 +14,10 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
+                            <a class="btn btn-secondary"
+                                href="{{ route('posts.schedule.edit', $p->id) }}">
+                                Actualizar fecha
+                            </a>
                             <form method="POST" action="{{ route('queue.cancel', $p->id) }}">
                                 @csrf <button class="px-3 py-1.5 rounded-lg bg-base-100">Cancelar</button>
                             </form>
