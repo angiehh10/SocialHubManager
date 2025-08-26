@@ -44,7 +44,9 @@ class SocialConnectionController extends Controller
             abort(404);
         }
 
-        optional($user->socialConnection($provider))->delete();
+         if ($conn = $user->socialConnection($provider)) {
+            $conn->delete(); // 👈 con CASCADE se van sus webhooks
+        }
 
         return back()->with('status', "Has desconectado {$provider}.");
     }

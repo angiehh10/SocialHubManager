@@ -1,4 +1,3 @@
-{{-- resources/views/social/connections.blade.php --}}
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">

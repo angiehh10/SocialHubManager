@@ -18,7 +18,8 @@ class PostController extends Controller
 
         public function create()
     {
-                $discordWebhooks = DiscordWebhook::where('user_id', Auth::id())
+                $discordWebhooks = \App\Models\DiscordWebhook::valid()   // 👈 filtra huérfanos
+                ->where('user_id', \Auth::id())
                 ->orderByDesc('id')
                 ->get();
 

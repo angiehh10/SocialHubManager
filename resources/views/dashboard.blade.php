@@ -4,7 +4,14 @@
         <div class="absolute inset-0 -z-10 bg-gradient-to-br from-primary-100 via-white to-transparent dark:from-primary-900/30 dark:via-base-900 dark:to-transparent"></div>
 
         <div class="max-w-6xl mx-auto px-6 py-8">
-            @if($needs2fa)
+                        @php
+                $user = auth()->user();
+                $twoFaEnabled = method_exists($user, 'hasEnabledTwoFactorAuthentication')
+                    ? $user->hasEnabledTwoFactorAuthentication()
+                    : ! is_null($user->two_factor_secret);
+            @endphp
+
+            @if (! $twoFaEnabled)
                 <div class="mb-4 rounded-xl border border-amber-200/60 bg-amber-50/60 dark:border-amber-800/50 dark:bg-amber-900/20 p-4">
                     <div class="flex items-start gap-3">
                         <svg class="h-5 w-5 text-amber-600 dark:text-amber-300 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
@@ -16,6 +23,7 @@
                     </div>
                 </div>
             @endif
+
 
             <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
                 <div>

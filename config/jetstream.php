@@ -59,10 +59,9 @@ return [
 
     'features' => [
         // Features::termsAndPrivacyPolicy(),
-        // Features::profilePhotos(),
+        Features::profilePhotos(),
         // Features::api(),
         // Features::teams(['invitations' => true]),
-        'confirmPassword' => true, // opcional
         Features::accountDeletion(),
     ],
 

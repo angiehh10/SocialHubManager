@@ -6,14 +6,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
-
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Jetstream\HasProfilePhoto;
+use Illuminate\Support\Facades\Storage; 
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
 
+    use HasApiTokens;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+     use HasFactory;
+    use HasProfilePhoto;
+    use Notifiable;
+    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +31,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'timezone'
     ];
 
     /**
@@ -35,6 +41,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
     ];
 
     /**
@@ -48,6 +56,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected $appends = [
+        'profile_photo_url',
+    ];
+
+     public function getProfilePhotoUrlAttribute(): string
+    {
+        $path = $this->profile_photo_path;
+
+        if (is_string($path) && preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+
+        if (! empty($path)) {
+            return Storage::disk($this->profilePhotoDisk())->url($path);
+        }
+
+        return $this->defaultProfilePhotoUrl();
     }
 
      public function socialConnections()

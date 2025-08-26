@@ -7,6 +7,7 @@ use App\Http\Controllers\SocialConnectionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\QueueController;
+use App\Http\Controllers\ProfilePhotoUrlController;
 
 // Públicas
 Route::view('/', 'welcome')->name('home');
@@ -63,3 +64,8 @@ Route::post('{queuedPost}/send-now', [QueueController::class, 'sendNow'])->name(
 // schedules
 Route::resource('schedules', ScheduleController::class)->only(['index','store','update','destroy']);
 });
+
+//Profile Photo
+Route::post('/user/profile/photo-url', [ProfilePhotoUrlController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('profile.photo-url');
